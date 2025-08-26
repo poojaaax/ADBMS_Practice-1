@@ -1,1 +1,46 @@
+CREATE TABLE FeePayments1(
+    payment_id INT PRIMARY KEY,
+    student_name VARCHAR(100),
+    amount DECIMAL(10,2),
+    payment_date DATE
+);
+INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date) VALUES
+ (1, 'Ashish', 5000.00, '2024-06-01');
+ INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date) VALUES
+ (2, 'Smaran', 4500.00, '2024-06-02');
+ INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date) VALUES
+ (3, 'Vaibhav', 5500.00, '2024-06-03');
+
+COMMIT;
+SELECT * FROM FeePayments1;
+
+INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date)
+VALUES (3, 'Rita', 5200.00, '2024-06-04');
+
+ROLLBACK;
+
+INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date)
+VALUES (5, 'Rita', 5200.00, '2024-06-04');
+INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date)
+VALUES (2, 'Lara', 5300.00, '2024-06-05');
+
+ROLLBACK;
+
+SELECT * FROM FeePayments1;
+
+
+
+INSERT INTO FeePayments1 (payment_id, student_name, amount, payment_date)
+VALUES (4,'Rahul', 6000.00, '2024-06-04');
+
+INSERT INTO FeePayments1 (payment_id, student_name, amount, payment_date)
+VALUES (2,'Duplicate', 7000.00, '2024-06-05');
+
+COMMIT;
+
+INSERT INTO FeePayments1 (payment_id, student_name, amount, payment_date)
+VALUES (5,'Karan', 4800.00, '2024-06-06');
+COMMIT;
+
+SELECT * FROM FeePayments1;
 
