@@ -1,46 +1,160 @@
-CREATE TABLE FeePayments1(
+//practice 4.1
+
+CREATE TABLE FeePayment (
     payment_id INT PRIMARY KEY,
-    student_name VARCHAR(100),
-    amount DECIMAL(10,2),
-    payment_date DATE
+    student_name VARCHAR(100) NOT NULL,
+    amount DECIMAL(10,2) CHECK (amount > 0),
+    payment_date DATE NOT NULL
 );
-INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date) VALUES
- (1, 'Ashish', 5000.00, '2024-06-01');
- INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date) VALUES
- (2, 'Smaran', 4500.00, '2024-06-02');
- INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date) VALUES
- (3, 'Vaibhav', 5500.00, '2024-06-03');
+
+START TRANSACTION;
+
+INSERT INTO FeePayment VALUES (1, 'Ashish', 5000.00, '2024-06-01');
+INSERT INTO FeePayment VALUES (2, 'Smaran', 4500.00, '2024-06-02');
+INSERT INTO FeePayment VALUES (3, 'Vaibhav', 5500.00, '2024-06-03');
 
 COMMIT;
-SELECT * FROM FeePayments1;
 
-INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date)
-VALUES (3, 'Rita', 5200.00, '2024-06-04');
+SELECT * FROM FeePayment;
+
+START TRANSACTION;
+
+INSERT INTO FeePayment VALUES (7, 'Sneha', 4700.00, '2024-06-08');
+INSERT INTO FeePayment VALUES (8, 'Kiran', 4900.00, '2024-06-09');
 
 ROLLBACK;
 
-INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date)
-VALUES (5, 'Rita', 5200.00, '2024-06-04');
-INSERT INTO FeePayments1(payment_id, student_name, amount, payment_date)
-VALUES (2, 'Lara', 5300.00, '2024-06-05');
+SELECT * FROM FeePayment;
+
+START TRANSACTION;
+
+INSERT INTO FeePayment VALUES (8, 'Arjun', 4900.00, '2024-06-09');
+
+INSERT INTO FeePayment VALUES (9, NULL, 4600.00, '2024-06-10');
 
 ROLLBACK;
 
-SELECT * FROM FeePayments1;
+SELECT * FROM FeePayment;
+
+START TRANSACTION;
+INSERT INTO FeePayment VALUES (7, 'Sneha', 4700.00, '2024-06-08');
+INSERT INTO FeePayment VALUES (8, 'Arjun', 4900.00, '2024-06-09');
+COMMIT;
+
+SELECT * FROM FeePayment;
+
+//practice 4.2
+
+DROP TABLE IF EXISTS StudentEnrollments;
+
+CREATE TABLE StudentEnrollments (
+    enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_name VARCHAR(100) NOT NULL,
+    course_id VARCHAR(10) NOT NULL,
+    enrollment_date DATE NOT NULL,
+    CONSTRAINT uq_student_course UNIQUE (student_name, course_id)
+);
+
+INSERT INTO StudentEnrollments (student_name, course_id, enrollment_date) VALUES
+('Ashish', 'CSE101', '2024-07-01'),
+('Smaran', 'CSE102', '2024-07-01'),
+('Vaibhav','CSE101', '2024-07-01');
 
 
+START TRANSACTION;
+INSERT INTO StudentEnrollments (student_name, course_id, enrollment_date)
+VALUES ('Ashish', 'CSE101', '2024-07-01');
+COMMIT;
 
-INSERT INTO FeePayments1 (payment_id, student_name, amount, payment_date)
-VALUES (4,'Rahul', 6000.00, '2024-06-04');
+START TRANSACTION;
+INSERT INTO StudentEnrollments (student_name, course_id, enrollment_date)
+VALUES ('Ashish', 'CSE101', '2024-07-01');
+ROLLBACK;
 
-INSERT INTO FeePayments1 (payment_id, student_name, amount, payment_date)
-VALUES (2,'Duplicate', 7000.00, '2024-06-05');
+
+START TRANSACTION;
+SELECT * FROM StudentEnrollments
+WHERE student_name = 'Ashish' AND course_id = 'CSE101'
+FOR UPDATE;
+START TRANSACTION;
+UPDATE StudentEnrollments
+SET enrollment_date = '2024-07-15'
+WHERE student_name = 'Ashish' AND course_id = 'CSE101';
 
 COMMIT;
 
-INSERT INTO FeePayments1 (payment_id, student_name, amount, payment_date)
-VALUES (5,'Karan', 4800.00, '2024-06-06');
+START TRANSACTION;
+SELECT * FROM StudentEnrollments
+WHERE student_name = 'Ashish' AND course_id = 'CSE101'
+FOR UPDATE;
+UPDATE StudentEnrollments
+SET enrollment_date = '2024-07-10'
+WHERE student_name = 'Ashish' AND course_id = 'CSE101';
 COMMIT;
 
-SELECT * FROM FeePayments1;
+START TRANSACTION;
+SELECT * FROM StudentEnrollments
+WHERE student_name = 'Ashish' AND course_id = 'CSE101'
+FOR UPDATE;
+UPDATE StudentEnrollments
+SET enrollment_date = '2024-07-20'
+WHERE student_name = 'Ashish' AND course_id = 'CSE101';
+COMMIT;
 
+SELECT * FROM StudentEnrollments;
+
+//practice 4.3
+
+DROP TABLE IF EXISTS StudentEnrollments;
+
+CREATE TABLE StudentEnrollments (
+    student_id INT PRIMARY KEY,
+    student_name VARCHAR(100),
+    course_id VARCHAR(10),
+    enrollment_date DATE
+);
+
+INSERT INTO StudentEnrollments VALUES
+(1,'Ashish','CSE101','2024-06-01'),
+(2,'Smaran','CSE102','2024-06-01'),
+(3,'Vaibhav','CSE103','2024-06-01');
+
+
+START TRANSACTION;
+UPDATE StudentEnrollments SET enrollment_date='2024-06-05' WHERE student_id=1;
+UPDATE StudentEnrollments SET enrollment_date='2024-06-06' WHERE student_id=2;
+COMMIT;
+
+START TRANSACTION;
+UPDATE StudentEnrollments SET enrollment_date='2024-06-07' WHERE student_id=2;
+UPDATE StudentEnrollments SET enrollment_date='2024-06-08' WHERE student_id=1;
+COMMIT;
+
+
+START TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+SELECT * FROM StudentEnrollments WHERE student_id=1;
+
+START TRANSACTION;
+UPDATE StudentEnrollments SET enrollment_date='2024-07-10' WHERE student_id=1;
+COMMIT;
+
+SELECT * FROM StudentEnrollments WHERE student_id=1;
+COMMIT;
+
+
+START TRANSACTION;
+SELECT * FROM StudentEnrollments WHERE student_id=1 FOR UPDATE;
+
+START TRANSACTION;
+SELECT * FROM StudentEnrollments WHERE student_id=1;
+COMMIT;
+
+START TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+SELECT * FROM StudentEnrollments WHERE student_id=1;
+
+START TRANSACTION;
+UPDATE StudentEnrollments SET enrollment_date='2024-08-01' WHERE student_id=1;
+COMMIT;
+
+SELECT * FROM StudentEnrollments WHERE student_id=1;
+COMMIT;
